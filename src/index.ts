@@ -37,6 +37,6 @@ app.get('/health', (_req: Request, res: Response) => {
 app.use('/api/auth', authRoutes);
 app.use('/api/steps', stepsRoutes);
 
-app.listen(port, () => {
+app.listen(Number(port), '0.0.0.0', () => {
   logger.info(`Quest to Mordor API running on port ${port}`);
 });
