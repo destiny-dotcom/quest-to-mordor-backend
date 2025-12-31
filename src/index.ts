@@ -2,10 +2,17 @@ import express, { Express, Request, Response } from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import logger from './utils/logger';
-import authRoutes from './routes/auth';
-import stepsRoutes from './routes/steps';
 
 dotenv.config();
+
+// Log startup info
+console.log('Starting Quest to Mordor API...');
+console.log('NODE_ENV:', process.env.NODE_ENV);
+console.log('PORT:', process.env.PORT);
+console.log('DATABASE_URL exists:', !!process.env.DATABASE_URL);
+
+import authRoutes from './routes/auth';
+import stepsRoutes from './routes/steps';
 
 const app: Express = express();
 const port = process.env.PORT || 3001;
