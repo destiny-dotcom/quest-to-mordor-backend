@@ -5,12 +5,6 @@ import logger from './utils/logger';
 
 dotenv.config();
 
-// Log startup info
-console.log('Starting Quest to Mordor API...');
-console.log('NODE_ENV:', process.env.NODE_ENV);
-console.log('PORT:', process.env.PORT);
-console.log('DATABASE_URL exists:', !!process.env.DATABASE_URL);
-
 import authRoutes from './routes/auth';
 import stepsRoutes from './routes/steps';
 
