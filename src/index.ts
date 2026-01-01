@@ -7,6 +7,8 @@ dotenv.config();
 
 import authRoutes from './routes/auth';
 import stepsRoutes from './routes/steps';
+import appleHealthRoutes from './routes/appleHealth';
+import webhookRoutes from './routes/webhooks';
 
 const app: Express = express();
 const port = process.env.PORT || 3001;
@@ -37,6 +39,8 @@ app.get('/health', (_req: Request, res: Response) => {
 // API Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/steps', stepsRoutes);
+app.use('/api/users/apple-health', appleHealthRoutes);
+app.use('/api/webhooks', webhookRoutes);
 
 app.listen(Number(port), '0.0.0.0', () => {
   logger.info(`Quest to Mordor API running on port ${port}`);

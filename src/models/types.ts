@@ -7,6 +7,10 @@ export interface User {
   total_steps: number;
   total_miles: number;
   current_milestone_id: string | null;
+  apple_health_api_key: string | null;
+  apple_health_api_key_created_at: Date | null;
+  apple_health_last_sync_at: Date | null;
+  apple_health_sync_enabled: boolean;
   created_at: Date;
   updated_at: Date;
 }
@@ -100,6 +104,26 @@ export interface ProgressResponse {
   total_miles: number;
   progress_to_next: number; // Percentage 0-100
   journey_progress: number; // Percentage 0-100 of total journey
+}
+
+// Apple Health Sync Types
+export interface AppleHealthSyncStatus {
+  enabled: boolean;
+  hasApiKey: boolean;
+  lastSyncAt: string | null;
+  apiKeyCreatedAt: string | null;
+}
+
+export interface GenerateApiKeyResponse {
+  apiKey: string;
+  createdAt: string;
+}
+
+export interface AppleHealthWebhookRequest {
+  step: {
+    step_count: number;
+    recorded_date: string;
+  };
 }
 
 // Constants
