@@ -9,6 +9,15 @@ const RATE_LIMIT_MAX = 10; // Max requests per hour
 const RATE_LIMIT_WINDOW = 60 * 60 * 1000; // 1 hour in ms
 
 /**
+ * Get yesterday's date in YYYY-MM-DD format
+ */
+function getYesterdayDate(): string {
+  const yesterday = new Date();
+  yesterday.setDate(yesterday.getDate() - 1);
+  return yesterday.toISOString().split('T')[0];
+}
+
+/**
  * Webhook endpoint for Apple Shortcut to submit step data
  * Authentication via X-Apple-Health-API-Key header
  */
@@ -64,30 +73,52 @@ export const appleHealthWebhook = async (req: Request, res: Response): Promise<v
       return;
     }
 
-    // Validate request body
-    const { step } = req.body;
+    // Validate request body - accept multiple formats for simplicity
+    let step_count: number;
+    let recorded_date: string;
 
-    if (!step || typeof step !== 'object') {
-      res.status(400).json({ error: 'Invalid request body. Expected { step: { step_count, recorded_date } }' });
+    // Format 1: Just a number (simplest - we use yesterday's date)
+    if (typeof req.body === 'number') {
+      step_count = req.body;
+      recorded_date = getYesterdayDate();
+    }
+    // Format 2: { steps: 1234 } (simple object)
+    else if (typeof req.body?.steps === 'number') {
+      step_count = req.body.steps;
+      recorded_date = getYesterdayDate();
+    }
+    // Format 3: { step_count: 1234 } (simple object)
+    else if (typeof req.body?.step_count === 'number') {
+      step_count = req.body.step_count;
+      recorded_date = req.body.recorded_date || getYesterdayDate();
+    }
+    // Format 4: { step: { step_count, recorded_date } } (original format)
+    else if (req.body?.step && typeof req.body.step === 'object') {
+      step_count = req.body.step.step_count;
+      recorded_date = req.body.step.recorded_date || getYesterdayDate();
+    }
+    // Format 5: Plain text number
+    else if (typeof req.body === 'string' && !isNaN(parseInt(req.body))) {
+      step_count = parseInt(req.body);
+      recorded_date = getYesterdayDate();
+    }
+    else {
+      res.status(400).json({
+        error: 'Invalid request body',
+        hint: 'Send step count as: a number, {"steps": 1234}, or {"step_count": 1234}'
+      });
       return;
     }
 
-    const { step_count, recorded_date } = step;
-
-    if (!step_count || typeof step_count !== 'number' || step_count < 0) {
+    if (!step_count || step_count < 0) {
       res.status(400).json({ error: 'Valid step_count is required (positive number)' });
       return;
     }
 
-    if (!recorded_date) {
-      res.status(400).json({ error: 'recorded_date is required (YYYY-MM-DD format)' });
-      return;
-    }
-
+    // Validate date format if provided
     const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
     if (!dateRegex.test(recorded_date)) {
-      res.status(400).json({ error: 'recorded_date must be in YYYY-MM-DD format' });
-      return;
+      recorded_date = getYesterdayDate(); // Fallback to yesterday
     }
 
     // Check for existing entry on this date
